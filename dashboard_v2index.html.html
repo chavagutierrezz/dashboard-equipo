@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dashboard Seguimiento Equipo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --color-primary: #2563EB;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            --color-info: #06B6D4;
+            --color-gray-50: #F9FAFB;
+            --color-gray-100: #F3F4F6;
+            --color-gray-200: #E5E7EB;
+            --color-gray-300: #D1D5DB;
+            --color-gray-400: #9CA3AF;
+            --color-gray-500: #6B7280;
+            --color-gray-600: #4B5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1F2937;
+            --color-gray-900: #111827;
+            --color-bg: #FFFFFF;
+            --color-text: #111827;
+            --color-text-secondary: #6B7280;
+            --color-border: #E5E7EB;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --color-primary: #3B82F6;
+                --color-success: #34D399;
+                --color-warning: #FBBF24;
+                --color-info: #22D3EE;
+                --color-gray-50: #0F172A;
+                --color-gray-100: #1E293B;
+                --color-gray-200: #334155;
+                --color-gray-300: #475569;
+                --color-gray-400: #64748B;
+                --color-gray-500: #94A3B8;
+                --color-gray-600: #CBD5E1;
+                --color-gray-700: #E2E8F0;
+                --color-gray-800: #F1F5F9;
+                --color-gray-900: #F8FAFC;
+                --color-bg: #0F172A;
+                --color-text: #F8FAFC;
+                --color-text-secondary: #94A3B8;
+                --color-border: #334155;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --color-primary: #3B82F6;
+            --color-success: #34D399;
+            --color-warning: #FBBF24;
+            --color-info: #22D3EE;
+            --color-gray-50: #0F172A;
+            --color-gray-100: #1E293B;
+            --color-gray-200: #334155;
+            --color-gray-300: #475569;
+            --color-gray-400: #64748B;
+            --color-gray-500: #94A3B8;
+            --color-gray-600: #CBD5E1;
+            --color-gray-700: #E2E8F0;
+            --color-gray-800: #F1F5F9;
+            --color-gray-900: #F8FAFC;
+            --color-bg: #0F172A;
+            --color-text: #F8FAFC;
+            --color-text-secondary: #94A3B8;
+            --color-border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-size: 16px;
+            line-height: 1.5;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        header {
+            background: var(--color-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 16px 0;
+            position: sticky;
+            top: env(safe-area-inset-top, 0px);
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        button {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 1px solid var(--color-border);
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--color-text);
+            background: var(--color-gray-50);
+        }
+
+        .tab-btn.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .calendar-day {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s;
+            background: var(--color-gray-100);
+            color: var(--color-text);
+            border: 2px solid transparent;
+        }
+
+        .calendar-day.green {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .calendar-day.orange {
+            background: var(--color-warning);
+            color: white;
+        }
+
+        .calendar-day.gray {
+            background: var(--color-gray-200);
+            color: var(--color-text-secondary);
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 8px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--color-gray-50);
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .section h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            padding: 8px 0;
+            color: var(--color-text);
+            font-size: 14px;
+        }
+
+        .hours-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .hours-input {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hours-input label {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: var(--color-text-secondary);
+        }
+
+        .hours-input input {
+            margin-bottom: 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .calendar {
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            }
+
+            .calendar-day {
+                padding: 8px 4px;
+                font-size: 11px;
+            }
+
+            .tab-btn {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
+
+            .section {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>📊 Dashboard Equipo Digital</h1>
+                <div class="header-controls">
+                    <select id="userSelect">
+                        <option value="Daniela">Daniela</option>
+                        <option value="Samuel">Samuel</option>
+                        <option value="Carla">Carla</option>
+                        <option value="Daniel">Daniel</option>
+                    </select>
+                    <button id="prevWeekBtn">← Semana Anterior</button>
+                    <button id="nextWeekBtn">Próxima Semana →</button>
+                    <div id="weekDisplay" style="font-weight: 600;"></div>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('daily')">📅 Vista Diaria</button>
+                <button class="tab-btn" onclick="switchTab('weekly')">📋 Resumen Semanal</button>
+                <button class="tab-btn" onclick="switchTab('analytics')">📈 Análisis & Gráficos</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- VISTA DIARIA -->
+            <div id="daily" class="tab-content active">
+                <div id="calendar" class="calendar"></div>
+                
+                <div class="section">
+                    <h3>📍 Tareas del Día</h3>
+                    <ul id="tasksList"></ul>
+                </div>
+
+                <div class="section">
+                    <h3>⚠️ Reprocesos (Errores/Cambios)</h3>
+                    <ul id="reprocessesList"></ul>
+                </div>
+
+                <div class="section">
+                    <h3>⏱️ Horas por Función</h3>
+                    <div class="hours-row">
+                        <div class="hours-input">
+                            <label>Diseño (h)</label>
+                            <input type="number" id="designHours" step="0.5" min="0" readonly>
+                        </div>
+                        <div class="hours-input">
+                            <label>Desarrollo (h)</label>
+                            <input type="number" id="devHours" step="0.5" min="0" readonly>
+                        </div>
+                        <div class="hours-input">
+                            <label>Marketing (h)</label>
+                            <input type="number" id="marketingHours" step="0.5" min="0" readonly>
+                        </div>
+                        <div class="hours-input">
+                            <label>Otro (h)</label>
+                            <input type="number" id="otherHours" step="0.5" min="0" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>✅ Objetivos del Día</h3>
+                    <ul id="goalsList"></ul>
+                </div>
+
+                <div class="section">
+                    <h3>📝 Notas</h3>
+                    <textarea id="notesArea" readonly rows="4"></textarea>
+                </div>
+            </div>
+
+            <!-- RESUMEN SEMANAL -->
+            <div id="weekly" class="tab-content">
+                <div class="section">
+                    <h3>📋 Resumen de la Semana</h3>
+                    <div id="weeklySummary" style="white-space: pre-wrap; font-size: 14px; line-height: 1.6;"></div>
+                </div>
+            </div>
+
+            <!-- ANÁLISIS Y GRÁFICOS -->
+            <div id="analytics" class="tab-content">
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 16px;">Distribución de Horas por Función</h3>
+                    <canvas id="hoursChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 16px;">Cumplimiento de Objetivos</h3>
+                    <canvas id="goalsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // DATOS PRELOADED EN MEMORIA (NO DEPENDE DE LOCALSTORAGE)
+        const preloadedData = {
+            '2026-09-14': {
+                tasks: [
+                    { name: 'Análisis de miembros Skool', hours: 2, completed: true },
+                    { name: 'Revisión de métricas LTV', hours: 1, completed: true },
+                    { name: 'Documentación de arquitectura', hours: 1.5, completed: true },
+                    { name: 'Pruebas y validación', hours: 3.5, completed: true }
+                ],
+                reprocesses: [
+                    { name: 'Clarificación de requerimientos vs realidad', time: 1, cause: 'Confusión inicial en requisitos' }
+                ],
+                goals: [
+                    { text: 'Entender arquitectura completa Skool/Stripe/WhatsApp/GHL', status: 'completed' },
+                    { text: 'Comenzar workflows en GHL', status: 'incomplete' }
+                ],
+                notes: 'Jornada 8am-5pm: Sesión enfocada en análisis de datos y aclaración de requisitos. Full de información nueva.',
+                timeFunctions: { design: 0, dev: 5.5, marketing: 2.5, other: 0 }
+            },
+            '2026-09-15': {
+                tasks: [
+                    { name: 'Estructura y mapeo de Classroom', hours: 2.5, completed: true },
+                    { name: 'Análisis y definición de naming de tiles', hours: 1.5, completed: true },
+                    { name: 'Revisión de desafíos 7 días gender-neutral', hours: 2, completed: true },
+                    { name: 'Coordinación y ajustes de posicionamiento', hours: 2, completed: true }
+                ],
+                reprocesses: [
+                    { name: 'Redefinición de posicionamiento ("90 días" → "suscripción mensual")', time: 0.5, cause: 'Cambio estratégico de dirección' }
+                ],
+                goals: [
+                    { text: 'Estructura final de tiles aprobada', status: 'completed' },
+                    { text: 'Posicionamiento alineado con suscripción mensual', status: 'completed' }
+                ],
+                notes: 'Jornada 8am-5pm: Redirección importante en posicionamiento. De "programa 90 días" a "suscripción mensual con brújula y plan".',
+                timeFunctions: { design: 2, dev: 1.5, marketing: 4.5, other: 0 }
+            },
+            '2026-09-16': {
+                tasks: [
+                    { name: 'Diseño de arquitectura para integración GHL-Skool', hours: 2.5, completed: true },
+                    { name: 'Análisis de flujo de datos y mapeos', hours: 1.5, completed: true },
+                    { name: 'Revisión de creativos Meta Ads y rendimiento', hours: 1.5, completed: true },
+                    { name: 'Análisis de contenido videos (gender-neutral)', hours: 1, completed: true },
+                    { name: 'Planificación técnica de workflows', hours: 1.5, completed: true }
+                ],
+                reprocesses: [],
+                goals: [
+                    { text: 'Clarificar completamente flujo de datos entre plataformas', status: 'completed' },
+                    { text: 'Validar mapeado de campos GHL-Skool', status: 'completed' }
+                ],
+                notes: 'Jornada 8am-5pm: Día de preparación técnica profunda para integración GHL-Skool.',
+                timeFunctions: { design: 1, dev: 4, marketing: 3, other: 0 }
+            },
+            '2026-09-17': {
+                tasks: [
+                    { name: 'Configuración Zap 2 en Zapier (teléfono desde Skool)', hours: 2, completed: true },
+                    { name: 'Diseño de pipeline GHL (6 etapas)', hours: 2.5, completed: true },
+                    { name: 'Creación y validación de custom fields', hours: 1.5, completed: true },
+                    { name: 'Pruebas end-to-end del flujo', hours: 2, completed: true }
+                ],
+                reprocesses: [
+                    { name: 'Errores en validaciones de Zapier', time: 0.8, cause: 'Incompatibilidad inicial entre campos' },
+                    { name: 'Ajustes en mapeo de campos GHL', time: 0.7, cause: 'Cambios en formato de datos' }
+                ],
+                goals: [
+                    { text: 'Pipeline con 6 etapas completamente funcional', status: 'completed' },
+                    { text: 'Zap 2 probado end-to-end con datos reales', status: 'completed' }
+                ],
+                notes: 'Jornada 8am-5pm: Día de configuración técnica pesada. Múltiples errores en workflows que requerían debugging profundo.',
+                timeFunctions: { design: 0, dev: 8, marketing: 0, other: 0 }
+            },
+            '2026-09-18': {
+                tasks: [
+                    { name: 'Configuración y publicación de Workflow A en GHL', hours: 2, completed: true },
+                    { name: 'Backfill de 26 miembros históricos en GHL', hours: 1.5, completed: true },
+                    { name: 'Limpieza y import de teléfonos vía CSV', hours: 1, completed: true },
+                    { name: 'Documentación y Brief HTML del pipeline', hours: 1.5, completed: true },
+                    { name: 'Testing y validación de flujos completos', hours: 2, completed: true }
+                ],
+                reprocesses: [],
+                goals: [
+                    { text: 'Workflow A publicado en producción', status: 'completed' },
+                    { text: '26 miembros históricos backeados correctamente', status: 'completed' },
+                    { text: 'Workflows B-E listos para siguiente iteración', status: 'incomplete' }
+                ],
+                notes: 'Jornada 8am-5pm: Día de consolidación. Workflow A se lleva a producción con 26 miembros backeados.',
+                timeFunctions: { design: 0, dev: 8, marketing: 0, other: 0 }
+            },
+            '2026-09-19': {
+                tasks: [
+                    { name: 'Optimización de campañas Meta (ROAS)', hours: 2, completed: true }
+                ],
+                reprocesses: [],
+                goals: [
+                    { text: 'Mejorar ROAS de campañas Skool Hombres', status: 'completed' }
+                ],
+                notes: 'Sábado: Conexión puntual 2 horas para optimizaciones de campaña (fuera de horario regular).',
+                timeFunctions: { design: 0, dev: 0, marketing: 2, other: 0 }
+            }
+        };
+
+        let currentUser = 'Daniela';
+        let currentDate = new Date('2026-09-14T00:00:00');
+        let currentData = {};
+        let hoursChart = null;
+        let goalsChart = null;
+
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function updateWeekDisplay() {
+            const weekStart = getWeekStart(currentDate);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            const format = (d) => d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+            document.getElementById('weekDisplay').textContent = `📅 ${format(weekStart)} - ${format(weekEnd)}`;
+        }
+
+        function renderCalendar() {
+            const weekStart = getWeekStart(currentDate);
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const data = preloadedData[dateStr];
+
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                const dayName = date.toLocaleDateString('es-ES', { weekday: 'short' });
+                const dayNum = date.getDate();
+
+                if (data && data.tasks && data.tasks.length > 0) {
+                    const allCompleted = data.tasks.every(t => t.completed);
+                    dayEl.classList.add(allCompleted ? 'green' : 'orange');
+                } else {
+                    dayEl.classList.add('gray');
+                }
+
+                dayEl.innerHTML = `<strong>${dayName}</strong><br>${dayNum}`;
+                dayEl.onclick = () => {
+                    currentDate = new Date(date);
+                    loadData();
+                    renderAllSections();
+                    updateWeekDisplay();
+                    renderCalendar();
+                };
+                calendar.appendChild(dayEl);
+            }
+        }
+
+        function loadData() {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            // Primero intenta obtener de preloadedData (datos en memoria)
+            if (preloadedData[dateStr]) {
+                currentData = JSON.parse(JSON.stringify(preloadedData[dateStr]));
+            } else {
+                // Si no hay datos preloaded, intenta localStorage
+                const key = `dashboard_${currentUser}_${dateStr}`;
+                const stored = localStorage.getItem(key);
+                if (stored) {
+                    currentData = JSON.parse(stored);
+                } else {
+                    currentData = { tasks: [], reprocesses: [], timeFunctions: { design: 0, dev: 0, marketing: 0, other: 0 }, goals: [], notes: '' };
+                }
+            }
+            populateForm();
+        }
+
+        function populateForm() {
+            if (!currentData.tasks) currentData.tasks = [];
+            if (!currentData.reprocesses) currentData.reprocesses = [];
+            if (!currentData.goals) currentData.goals = [];
+            if (!currentData.timeFunctions) currentData.timeFunctions = { design: 0, dev: 0, marketing: 0, other: 0 };
+
+            document.getElementById('tasksList').innerHTML = currentData.tasks
+                .map(t => `<li>✅ ${t.name} (${t.hours}h)</li>`).join('');
+
+            document.getElementById('reprocessesList').innerHTML = currentData.reprocesses
+                .map(r => `<li>⚙️ ${r.name} (${r.time}h): ${r.cause}</li>`).join('');
+
+            document.getElementById('designHours').value = currentData.timeFunctions.design || 0;
+            document.getElementById('devHours').value = currentData.timeFunctions.dev || 0;
+            document.getElementById('marketingHours').value = currentData.timeFunctions.marketing || 0;
+            document.getElementById('otherHours').value = currentData.timeFunctions.other || 0;
+
+            document.getElementById('goalsList').innerHTML = currentData.goals
+                .map(g => `<li>${g.status === 'completed' ? '✓' : '✗'} ${g.text}</li>`).join('');
+
+            document.getElementById('notesArea').value = currentData.notes || '';
+        }
+
+        function renderAllSections() {
+            populateForm();
+            renderWeeklySummary();
+            renderAnalyticsCharts();
+        }
+
+        function renderWeeklySummary() {
+            const weekStart = getWeekStart(currentDate);
+            let summary = '';
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const data = preloadedData[dateStr];
+
+                if (data) {
+                    const dayName = date.toLocaleDateString('es-ES', { weekday: 'long', month: 'long', day: 'numeric' });
+                    const totalHours = data.timeFunctions.design + data.timeFunctions.dev + data.timeFunctions.marketing + data.timeFunctions.other;
+                    const tasks = data.tasks.map(t => `• ${t.name} (${t.hours}h)`).join('\n');
+                    const repro = data.reprocesses.length > 0 ? '\nReprocesos:\n' + data.reprocesses.map(r => `• ${r.name} (${r.time}h) - ${r.cause}`).join('\n') : '';
+                    
+                    summary += `📅 ${dayName.toUpperCase()}\nTotal: ${totalHours}h\n\nTareas:\n${tasks}${repro}\n\nNotas: ${data.notes}\n\n---\n\n`;
+                }
+            }
+
+            document.getElementById('weeklySummary').textContent = summary;
+        }
+
+        function renderAnalyticsCharts() {
+            const weekStart = getWeekStart(currentDate);
+            const totalsByFunction = { design: 0, dev: 0, marketing: 0, other: 0 };
+            const goals = { completed: 0, incomplete: 0 };
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const data = preloadedData[dateStr];
+
+                if (data) {
+                    Object.keys(totalsByFunction).forEach(fn => {
+                        totalsByFunction[fn] += data.timeFunctions[fn] || 0;
+                    });
+                    if (data.goals) {
+                        data.goals.forEach(g => {
+                            if (g.status === 'completed') goals.completed++;
+                            else goals.incomplete++;
+                        });
+                    }
+                }
+            }
+
+            // Gráfico de horas por función
+            const hoursCtx = document.getElementById('hoursChart').getContext('2d');
+            if (hoursChart) hoursChart.destroy();
+            hoursChart = new Chart(hoursCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Diseño', 'Desarrollo', 'Marketing', 'Otro'],
+                    datasets: [{
+                        data: [totalsByFunction.design, totalsByFunction.dev, totalsByFunction.marketing, totalsByFunction.other],
+                        backgroundColor: ['#F59E0B', '#3B82F6', '#10B981', '#6B7280'],
+                        borderColor: 'var(--color-bg)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Gráfico de objetivos
+            const goalsCtx = document.getElementById('goalsChart').getContext('2d');
+            if (goalsChart) goalsChart.destroy();
+            goalsChart = new Chart(goalsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completados', 'Incompletos'],
+                    datasets: [{
+                        data: [goals.completed, goals.incomplete],
+                        backgroundColor: ['#10B981', '#EF4444'],
+                        borderColor: 'var(--color-bg)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // INICIALIZACIÓN
+        updateWeekDisplay();
+        renderCalendar();
+        loadData();
+        renderAllSections();
+
+        document.getElementById('userSelect').addEventListener('change', (e) => {
+            currentUser = e.target.value;
+            loadData();
+            renderAllSections();
+        });
+
+        document.getElementById('prevWeekBtn').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 7);
+            updateWeekDisplay();
+            renderCalendar();
+            loadData();
+            renderAllSections();
+        });
+
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 7);
+            updateWeekDisplay();
+            renderCalendar();
+            loadData();
+            renderAllSections();
+        });
+    </script>
+</body>
+</html>
